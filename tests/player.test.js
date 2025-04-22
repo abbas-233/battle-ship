@@ -1,7 +1,8 @@
-import Player from '../src/player';
-import Gameboard from '../src/gameboard'; // Needed to mock
+import Player from '../src/player.js';
+import Gameboard from '../src/gameboard.js'; // Needed to mock
 
 // Mock the Gameboard factory
+import { jest } from '@jest/globals';
 jest.mock('../src/gameboard');
 
 beforeEach(() => {

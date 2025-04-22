@@ -1,5 +1,5 @@
-import Gameboard from '../src/gameboard';
-import Ship from '../src/ship'; // We need Ship for testing placement
+import Gameboard from '../src/gameboard.js';
+import Ship from '../src/ship.js'; // We need Ship for testing placement
 
 describe('Gameboard factory', () => {
   let testBoard;

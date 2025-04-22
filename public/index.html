@@ -7,13 +7,28 @@
 </head>
 <body>
   <h1>Battleship</h1>
-  <div id="message-area">Place your ships!</div> <!-- Message Area -->
+  <div id="message-area">Place your ships! Click a ship, then click on your board.</div> <!-- Updated Message -->
+
+  <div id="controls-container">
+    <div id="placement-controls">
+        <h3>Available Ships</h3>
+        <ul id="ship-list">
+            <!-- Ships will be listed here by JS -->
+        </ul>
+        <button id="rotate-button" type="button">Rotate Ship (Horizontal)</button>
+        <button id="random-placement" type="button">Random Placement</button>
+        <button id="start-button" type="button" disabled>Start Game</button> <!-- Disabled initially -->
+    </div>
+    <button id="sound-toggle" type="button">Sound: ON</button>
+    <button id="reset-button" type="button" style="display: none;">Play Again?</button> <!-- Hidden initially -->
+  </div>
+
   <div id="game-container">
     <div class="board-container">
         <h2>Your Board</h2>
         <div id="player-board" class="game-board"></div>
     </div>
-    <div class="board-container">
+    <div id="computer-board-container" class="board-container" style="display: none;"> <!-- Initially hidden -->
         <h2>Enemy Board</h2>
         <div id="computer-board" class="game-board"></div>
     </div>

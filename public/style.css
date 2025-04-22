@@ -23,6 +23,45 @@ h1 {
     min-height: 1.5em; /* Prevent layout shift */
 }
 
+/* Controls container styles */
+#controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#sound-toggle {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#sound-toggle:hover {
+    background-color: #45a049;
+}
+
+#reset-button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.2s;
+}
+
+#reset-button:hover {
+    background-color: #d32f2f;
+}
+
 #game-container {
   display: flex;
   justify-content: space-around;
@@ -99,4 +138,56 @@ h1 {
 /* Show hits on enemy ships */
 #computer-board .cell.hit {
     background-color: #ff6666; /* Keep hit color */
+}
+
+/* --- Placement Phase Styles --- */
+
+#placement-controls {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#ship-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 15px 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#ship-list li {
+    padding: 8px 12px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+}
+
+#ship-list li.selected {
+    background-color: #a0f0a0;
+    border-color: #008000;
+    font-weight: bold;
+}
+
+#placement-controls button {
+    padding: 8px 15px;
+    margin: 0 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+/* Player board specific styles during placement */
+.placement-phase #player-board .cell {
+    cursor: crosshair; /* Indicate placement mode */
+}
+
+/* Hover effects for placement */
+.placement-phase #player-board .cell.hover-valid {
+    background-color: rgba(0, 255, 0, 0.3); /* Green tint for valid spots */
+}
+
+.placement-phase #player-board .cell.hover-invalid {
+    background-color: rgba(255, 0, 0, 0.3); /* Red tint for invalid spots */
 } 

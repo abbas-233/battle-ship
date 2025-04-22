@@ -1,4 +1,4 @@
-import Ship from './ship'; // May need Ship if placing involves creating them here
+import Ship from './ship.js'; // May need Ship if placing involves creating them here
 
 const Gameboard = (size = 10) => {
   // Initialize grid
@@ -96,6 +96,8 @@ const Gameboard = (size = 10) => {
     getMissedAttacks,
     allShipsSunk,
     getGrid, // Expose for testing and potentially rendering
+    hasBeenAttacked, // Expose for rendering checks
+    isValidCoordinate // Potentially useful externally
   };
 };
 
