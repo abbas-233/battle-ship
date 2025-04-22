@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: 'development', // Use 'production' for production builds
@@ -12,6 +13,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Battleship',
       template: './public/index.html', // Use our HTML template
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: "assets", to: "assets" },
+      ],
     }),
   ],
   output: {

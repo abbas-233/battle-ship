@@ -10,17 +10,19 @@
   <div id="message-area">Place your ships! Click a ship, then click on your board.</div> <!-- Updated Message -->
 
   <div id="controls-container">
+    <div id="ship-list-container">
+      <h3>Available Ships</h3>
+      <ul id="ship-list">
+        <!-- Ships will be listed here by JS -->
+      </ul>
+    </div>
     <div id="placement-controls">
-        <h3>Available Ships</h3>
-        <ul id="ship-list">
-            <!-- Ships will be listed here by JS -->
-        </ul>
-        <button id="rotate-button" type="button">Rotate Ship (Horizontal)</button>
-        <button id="random-placement" type="button">Random Placement</button>
-        <button id="start-button" type="button" disabled>Start Game</button> <!-- Disabled initially -->
+      <button id="rotate-button" type="button">Rotate Ship (Horizontal)</button>
+      <button id="random-placement" type="button">Random Placement</button>
+      <button id="start-button" type="button" disabled>Start Game</button>
     </div>
     <button id="sound-toggle" type="button">Sound: ON</button>
-    <button id="reset-button" type="button" style="display: none;">Play Again?</button> <!-- Hidden initially -->
+    <button id="reset-button" type="button" style="display: none;">Play Again?</button>
   </div>
 
   <div id="game-container">

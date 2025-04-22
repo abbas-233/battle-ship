@@ -14,6 +14,7 @@ const domController = (() => {
   const soundToggleButton = document.getElementById('sound-toggle');
   const placementControlsContainer = document.getElementById('placement-controls');
   const messageArea = document.getElementById('message-area');
+  const shipListMainContainer = document.getElementById('ship-list-container');
 
   // Now using SVGs from Heroicons in assets/images/heroicons
   const shipIcons = {
@@ -151,6 +152,7 @@ const domController = (() => {
       if (isActive) {
           document.body.classList.add('placement-phase');
           placementControlsContainer.style.display = 'block';
+          if (shipListMainContainer) shipListMainContainer.style.display = 'block';
           computerBoardWrapper.style.display = 'none';
           startButton.disabled = true;
           resetButton.style.display = 'none';
@@ -158,6 +160,7 @@ const domController = (() => {
       } else {
           document.body.classList.remove('placement-phase');
           placementControlsContainer.style.display = 'none';
+          if (shipListMainContainer) shipListMainContainer.style.display = 'none';
           computerBoardWrapper.style.display = 'flex'; // Or block, depending on desired layout
           startButton.disabled = true; // Keep disabled until game actually starts
           resetButton.style.display = 'none'; // Hide reset until game over
