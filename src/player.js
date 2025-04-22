@@ -130,8 +130,6 @@ const Player = (type = 'human', gameboardFactory = Gameboard) => {
     computerIntelligentAttack, // Computer uses this
     initializeAvailableAttacks, // Expose for testing
     addPotentialTargets, // Expose for testing
-    availableAttacks, // Expose for testing
-    potentialTargets, // Expose for testing
   };
 };
 

@@ -1,110 +1,82 @@
 import { jest } from '@jest/globals';
-
-// Define the mock factory and the instance it returns
-const mockGameboardInstance = {
-  placeShip: jest.fn(),
-  receiveAttack: jest.fn((row, col) => {
-    // Simulate hit/miss logic for testing computer AI targeting
-    // Let's say (1,1) and (1,2) are hits
-    if ((row === 1 && col === 1) || (row === 1 && col === 2)) {
-      return true; // Simulate a hit
-    }
-    return false; // Simulate a miss
-  }),
-  hasBeenAttacked: jest.fn(() => false), // Default mock: no cell attacked yet
-  getGrid: jest.fn(() => Array(10).fill(0).map(() => Array(10).fill(null))), // Mock grid
-  allShipsSunk: jest.fn(() => false), // Default mock: game not over
-};
-const mockGameboardFactory = jest.fn(() => mockGameboardInstance);
-
-// --- Mock Gameboard BEFORE importing Player ---
-jest.mock('../src/gameboard.js', () => ({
-  __esModule: true,
-  default: mockGameboardFactory
-}));
-
-// --- Import Player AFTER mocking ---
 import Player from '../src/player.js';
+import Gameboard from '../src/gameboard.js'; // Import real Gameboard
 
 describe('Player factory', () => {
-  // Import the mocked module here as well, though not strictly needed
-  // import Gameboard from '../src/gameboard.js';
+  let testBoard; // Real gameboard instance
+  let receiveAttackSpy;
+  let hasBeenAttackedSpy;
+  let allShipsSunkSpy;
+  let getGridSpy;
 
   beforeEach(() => {
-    // Reset the mock factory itself before each test
-    mockGameboardFactory.mockClear();
-    
-    // Reset the mocks on the *instance* returned by the factory
-    mockGameboardInstance.placeShip.mockClear();
-    mockGameboardInstance.receiveAttack.mockClear();
-    mockGameboardInstance.hasBeenAttacked.mockClear();
-    // Reset hasBeenAttacked mock implementation to default (false)
-    mockGameboardInstance.hasBeenAttacked.mockImplementation(() => false);
-    mockGameboardInstance.allShipsSunk.mockClear();
+    testBoard = Gameboard(); // Create a real board
+    // Spy on the methods of the real board instance
+    receiveAttackSpy = jest.spyOn(testBoard, 'receiveAttack');
+    hasBeenAttackedSpy = jest.spyOn(testBoard, 'hasBeenAttacked');
+    allShipsSunkSpy = jest.spyOn(testBoard, 'allShipsSunk');
+    getGridSpy = jest.spyOn(testBoard, 'getGrid');
+
+    // Default mock implementations (can be overridden in tests)
+    receiveAttackSpy.mockReturnValue(false); // Default to miss
+    hasBeenAttackedSpy.mockReturnValue(false); // Default to not attacked
+    allShipsSunkSpy.mockReturnValue(false);
+    // getGridSpy doesn't need a default mock, it uses the real implementation
   });
 
+  afterEach(() => {
+    // Restore all mocks after each test
+    jest.restoreAllMocks();
+  });
+
+  // Helper function to create player with the spied board
+  const createPlayer = (type) => Player(type, () => testBoard);
+
   test('creates a human player with a gameboard', () => {
-    const humanPlayer = Player('human');
+    const humanPlayer = createPlayer('human');
     expect(humanPlayer.getType()).toBe('human');
-    // Check if our mock factory was called when Player() was executed
-    expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
-    // The player should have a 'gameboard' property holding the mock instance
-    expect(humanPlayer.gameboard).toBe(mockGameboardInstance);
+    // The player's gameboard should be the instance we spied on
+    expect(humanPlayer.gameboard).toBe(testBoard);
   });
 
   test('creates a computer player with a gameboard', () => {
-    const computerPlayer = Player('computer');
+    const computerPlayer = createPlayer('computer');
     expect(computerPlayer.getType()).toBe('computer');
-    // Check if our mock factory was called
-    expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
-    expect(computerPlayer.gameboard).toBe(mockGameboardInstance);
+    expect(computerPlayer.gameboard).toBe(testBoard);
   });
 
-  // ... rest of the tests should remain the same ...
-  // Make sure any direct manipulation of player.gameboard uses the mockGameboardInstance methods
-
   test('human player can attack enemy gameboard', () => {
-    const humanPlayer = Player('human');
-    const mockEnemyBoard = {
-          receiveAttack: jest.fn()
-      };
-      humanPlayer.attack(1, 2, mockEnemyBoard);
-    expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledTimes(1);
-      expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledWith(1, 2);
+    const humanPlayer = createPlayer('human');
+    // Create a separate enemy board for this test
+    const enemyBoard = Gameboard();
+    const enemyReceiveAttackSpy = jest.spyOn(enemyBoard, 'receiveAttack');
+
+    humanPlayer.attack(1, 2, enemyBoard);
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1);
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledWith(1, 2);
   });
 
   test('computer player type cannot use human attack method', () => {
-    const computerPlayer = Player('computer');
-    const mockEnemyBoard = { receiveAttack: jest.fn() };
-    expect(() => computerPlayer.attack(1, 2, mockEnemyBoard)).toThrow('Only human players use attack()');
+    const computerPlayer = createPlayer('computer');
+    const enemyBoard = Gameboard();
+    expect(() => computerPlayer.attack(1, 2, enemyBoard)).toThrow('Only human players use attack()');
   });
 
   // --- Computer Attack Tests ---
 
   test('computer player makes a valid random attack', () => {
-    // Ensure the factory is called when creating the player
-    mockGameboardFactory.mockClear();
-    const computerPlayer = Player('computer');
-    expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
+    const computerPlayer = createPlayer('computer');
+    const enemyBoard = Gameboard(); // Use a real board for the enemy
+    const enemyReceiveAttackSpy = jest.spyOn(enemyBoard, 'receiveAttack').mockReturnValue(false);
+    jest.spyOn(enemyBoard, 'hasBeenAttacked').mockReturnValue(false);
 
-    const mockEnemyBoard = {
-        receiveAttack: jest.fn((r, c) => {
-            return false; // Always miss
-        }),
-      hasBeenAttacked: jest.fn(() => false)
-    };
+    const attackResult = computerPlayer.computerIntelligentAttack(enemyBoard);
 
-    // No need to mock computerPlayer.gameboard.getGrid here, as
-    // computerPlayer.gameboard IS mockGameboardInstance, which already has getGrid mocked.
-
-    const attackResult = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
-
-    expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledTimes(1);
-    const [row, col] = mockEnemyBoard.receiveAttack.mock.calls[0];
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1);
+    const [row, col] = enemyReceiveAttackSpy.mock.calls[0];
 
     expect(attackResult.row).toBe(row);
     expect(attackResult.col).toBe(col);
-
     expect(row).toBeGreaterThanOrEqual(0);
     expect(row).toBeLessThan(10);
     expect(col).toBeGreaterThanOrEqual(0);
@@ -113,123 +85,147 @@ describe('Player factory', () => {
   });
 
   test('computer player does not attack the same spot twice', () => {
-    mockGameboardFactory.mockClear();
-    const computerPlayer = Player('computer');
-    expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
+    const computerPlayer = createPlayer('computer');
+    const enemyBoard = Gameboard();
+    const enemyReceiveAttackSpy = jest.spyOn(enemyBoard, 'receiveAttack').mockReturnValue(false);
+    // Mock board state: all cells attacked except (9, 9)
+    const enemyHasBeenAttackedSpy = jest.spyOn(enemyBoard, 'hasBeenAttacked').mockImplementation((r, c) => !(r === 9 && c === 9));
 
-    const mockEnemyBoard = {
-        receiveAttack: jest.fn().mockReturnValue(false),
-        hasBeenAttacked: jest.fn().mockImplementation((r, c) => {
-            return !(r === 9 && c === 9);
-        })
-    };
+    computerPlayer.initializeAvailableAttacks(); // Initialize based on default 10x10 size
 
-    // Access internal state (still potentially fragile, but necessary for this test logic)
-    computerPlayer.initializeAvailableAttacks();
-    const attackedCoords = new Set();
-    for (let i = 0; i < 99; i++) {
-        const { row, col } = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
-        if (row !== null) { // Only add if an attack was made
-             attackedCoords.add(`${row},${col}`);
-        }
+    // First call should attack the only theoretically available spot (9,9)
+    // Need to ensure initializeAvailableAttacks considers the mocked hasBeenAttacked state
+    // Or, more simply, the AI should query hasBeenAttacked before attacking.
+    // Let's assume initializeAvailableAttacks creates the full set, and the AI checks hasBeenAttacked later.
+
+    // Force the AI to attack the only non-attacked spot
+    // This requires manipulating the internal availableAttacks, which we wanted to avoid.
+    // Let's simplify: Attack 100 times. The logic should prevent duplicates.
+    const attackedLog = new Set();
+    for (let i = 0; i < 100; i++) {
+      // Allow all attacks for this loop, check uniqueness later
+      enemyHasBeenAttackedSpy.mockReturnValue(false);
+      const {row, col} = computerPlayer.computerIntelligentAttack(enemyBoard);
+      if (row !== null) {
+        attackedLog.add(`${row},${col}`);
+        // Mock that the attacked cell is now attacked for subsequent AI checks
+        enemyHasBeenAttackedSpy.mockImplementation((r, c) => attackedLog.has(`${r},${c}`));
+      }
     }
-    // Force the state for the final attack (assuming random hits didn't land perfectly)
-    computerPlayer.availableAttacks = new Set(['9,9']);
-    computerPlayer.potentialTargets = []; // Ensure no potential targets interfere
 
-    const attackResult = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
+    // Check if 100 unique spots were attacked
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(100);
+    expect(attackedLog.size).toBe(100);
 
-    expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledWith(9, 9);
-    expect(attackResult.row).toBe(9);
-    expect(attackResult.col).toBe(9);
-
-     const secondAttackResult = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
-     expect(secondAttackResult.row).toBeNull();
-     expect(secondAttackResult.col).toBeNull();
-     // The number of calls might vary slightly due to random hits in the loop,
-     // but receiveAttack(9,9) should be the last *successful* call.
-     // Let's focus on the final state.
-     expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledTimes(100); // Expect exactly 100 calls total (99 loop + 1 final)
+    // Now all spots should be considered attacked by the mock
+    enemyHasBeenAttackedSpy.mockImplementation(() => true);
+    const finalAttack = computerPlayer.computerIntelligentAttack(enemyBoard);
+    expect(finalAttack.row).toBeNull();
+    expect(finalAttack.col).toBeNull();
+    // No more calls to receiveAttack
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(100);
   });
 
 
   test('computer player prioritizes adjacent cells after a hit', () => {
-      mockGameboardFactory.mockClear();
-      const computerPlayer = Player('computer');
-      expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
+      const computerPlayer = createPlayer('computer');
+      const enemyBoard = Gameboard();
+      const attackedCoords = new Set();
 
-      const mockEnemyBoard = {
-          receiveAttack: jest.fn((row, col) => (row === 1 && col === 1)), // Hit only at (1,1)
-          hasBeenAttacked: jest.fn(() => false),
-      };
+      // Spy and mock implementation
+      const enemyReceiveAttackSpy = jest.spyOn(enemyBoard, 'receiveAttack');
+      const enemyHasBeenAttackedSpy = jest.spyOn(enemyBoard, 'hasBeenAttacked').mockImplementation((r, c) => attackedCoords.has(`${r},${c}`));
 
-      // Setup internal state
       computerPlayer.initializeAvailableAttacks();
-      // Simulate the FIRST attack hitting (1,1) - need to update player's internal state
-      const firstAttackCoord = '1,1';
-      computerPlayer.availableAttacks.delete(firstAttackCoord);
-      computerPlayer.addPotentialTargets(1, 1, mockEnemyBoard);
 
-      // Perform the NEXT attack (should pick from potentialTargets)
-      const attackResult = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
+      // --- First Attack (Let AI choose randomly) ---
+      enemyReceiveAttackSpy.mockReturnValueOnce(true); // Make the *first* attack a hit regardless of coord
+      const firstAttackResult = computerPlayer.computerIntelligentAttack(enemyBoard);
+      expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1);
+      const [firstRow, firstCol] = enemyReceiveAttackSpy.mock.calls[0]; // Get the actual first coord
+      attackedCoords.add(`${firstRow},${firstCol}`);
+      expect(firstAttackResult.hit).toBe(true); // Verify the mock worked
 
-      expect(mockEnemyBoard.receiveAttack).toHaveBeenCalledTimes(1);
-      const [row, col] = mockEnemyBoard.receiveAttack.mock.calls[0];
+      // Subsequent attacks are misses
+      enemyReceiveAttackSpy.mockReturnValue(false);
+
+      // --- Second Attack (Should be adjacent to the *actual* first hit) ---
+      computerPlayer.computerIntelligentAttack(enemyBoard);
+      expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(2);
+      const calls = enemyReceiveAttackSpy.mock.calls;
+      const [secondRow, secondCol] = calls[calls.length - 1];
+      attackedCoords.add(`${secondRow},${secondCol}`); // Log the second attack
 
       const isAdjacent =
-          (Math.abs(row - 1) === 1 && col === 1) || (row === 1 && Math.abs(col - 1) === 1);
+          (Math.abs(secondRow - firstRow) === 1 && secondCol === firstCol) ||
+          (secondRow === firstRow && Math.abs(secondCol - firstCol) === 1);
+
       expect(isAdjacent).toBe(true);
-
-      expect(computerPlayer.availableAttacks.has(`${row},${col}`)).toBe(false);
-
-      expect(attackResult.row).toBe(row);
-      expect(attackResult.col).toBe(col);
-      expect(attackResult.hit).toBe(false);
-
-      // Check internal state: potential target was used
-      expect(computerPlayer.potentialTargets.some(t => t.row === row && t.col === col)).toBe(false);
   });
 
-    test('computer player attacks randomly again if potential targets list is exhausted', () => {
-      mockGameboardFactory.mockClear();
-      const computerPlayer = Player('computer');
-      expect(mockGameboardFactory).toHaveBeenCalledTimes(1);
+  test('computer player attacks randomly again if potential targets list is exhausted', () => {
+    const computerPlayer = createPlayer('computer');
+    const enemyBoard = Gameboard();
+    const attackedCoords = new Set();
 
-      const mockEnemyBoard = {
-          receiveAttack: jest.fn().mockReturnValue(false), // Always miss
-          hasBeenAttacked: jest.fn(() => false),
-      };
+    // Spy and mock implementation
+    const enemyReceiveAttackSpy = jest.spyOn(enemyBoard, 'receiveAttack');
+    const enemyHasBeenAttackedSpy = jest.spyOn(enemyBoard, 'hasBeenAttacked').mockImplementation((r, c) => attackedCoords.has(`${r},${c}`));
 
-      computerPlayer.initializeAvailableAttacks();
+    computerPlayer.initializeAvailableAttacks();
 
-      // Simulate a hit at (1,1) and add potential targets
-       computerPlayer.availableAttacks.delete('1,1');
-      computerPlayer.addPotentialTargets(1, 1, mockEnemyBoard);
-       const initialPotentialTargets = [...computerPlayer.potentialTargets];
+    // --- First Attack (Let AI choose randomly, make it a hit) ---
+    enemyReceiveAttackSpy.mockReturnValueOnce(true); // First call is a hit
+    const firstAttackResult = computerPlayer.computerIntelligentAttack(enemyBoard);
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1);
+    const [firstRow, firstCol] = enemyReceiveAttackSpy.mock.calls[0];
+    attackedCoords.add(`${firstRow},${firstCol}`);
+    expect(firstAttackResult.hit).toBe(true);
 
-       // Simulate attacking all potential targets by removing them from available
-       initialPotentialTargets.forEach(target => {
-           computerPlayer.availableAttacks.delete(`${target.row},${target.col}`);
-       });
-       // Force potential targets to be empty for the next attack call
-       computerPlayer.potentialTargets = [];
+    // Subsequent attacks are misses
+    enemyReceiveAttackSpy.mockReturnValue(false);
 
-      // Now attack - it should pick a random spot NOT adjacent to (1,1) or (1,1) itself
-       const attackResult = computerPlayer.computerIntelligentAttack(mockEnemyBoard);
-       const [row, col] = mockEnemyBoard.receiveAttack.mock.calls[0];
+    // Calculate expected adjacent coordinates based on the actual first hit
+    const adjacentCoords = [];
+    const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    deltas.forEach(([dr, dc]) => {
+        const nr = firstRow + dr;
+        const nc = firstCol + dc;
+        if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) { // Check bounds
+            adjacentCoords.push({ row: nr, col: nc });
+        }
+    });
+    const adjacentCoordStrings = new Set(adjacentCoords.map(c => `${c.row},${c.col}`));
 
-      expect(attackResult.row).toBe(row);
-      expect(attackResult.col).toBe(col);
+    // --- Exhaust Potential Targets (Attack adjacent cells) ---
+    // Assumes the AI correctly targets these adjacent cells next
+    const expectedAdjacentCount = adjacentCoords.length;
+    for (let i = 0; i < expectedAdjacentCount; i++) {
+        computerPlayer.computerIntelligentAttack(enemyBoard);
+    }
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1 + expectedAdjacentCount);
 
-      // Check it wasn't (1,1)
-      expect(`${row},${col}` !== '1,1').toBe(true);
-      // Check it wasn't one of the initial adjacent targets that were theoretically exhausted
-       const wasAdjacentTarget = initialPotentialTargets.some(t => t.row === row && t.col === col);
-      expect(wasAdjacentTarget).toBe(false);
+    // Verify adjacent cells were attacked
+    adjacentCoords.forEach(coord => {
+      // Check if the coord was among the last N calls
+      const recentCalls = enemyReceiveAttackSpy.mock.calls.slice(1); // Exclude the first hit call
+      const wasCalled = recentCalls.some(call => call[0] === coord.row && call[1] === coord.col);
+      if(wasCalled) attackedCoords.add(`${coord.row},${coord.col}`); // Ensure it's logged if called
+      expect(wasCalled).toBe(true);
+    });
+
+    // --- Final Attack (Should be random, non-adjacent) ---
+    computerPlayer.computerIntelligentAttack(enemyBoard);
+    expect(enemyReceiveAttackSpy).toHaveBeenCalledTimes(1 + expectedAdjacentCount + 1);
+    const calls = enemyReceiveAttackSpy.mock.calls;
+    const [finalRow, finalCol] = calls[calls.length - 1];
+    attackedCoords.add(`${finalRow},${finalCol}`); // Log final attack
+
+    // Check it wasn't the original hit or adjacent
+    expect(`${finalRow},${finalCol}` !== `${firstRow},${firstCol}`).toBe(true);
+    expect(adjacentCoordStrings.has(`${finalRow},${finalCol}`)).toBe(false);
   });
-
-
 });
-// The tests manipulating internal state (availableAttacks, potentialTargets)
-// are still somewhat brittle as they rely on implementation details of Player.
-// If the Player factory changes how it manages state, these tests might break. 
+
+// Note: These tests still rely on the AI behaving predictably (e.g., targeting all adjacent cells before random).
+// Failures might still indicate subtle AI logic bugs or overly strict test assumptions. 

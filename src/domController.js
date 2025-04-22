@@ -15,12 +15,13 @@ const domController = (() => {
   const placementControlsContainer = document.getElementById('placement-controls');
   const messageArea = document.getElementById('message-area');
 
+  // Now using SVGs from Heroicons in assets/images/heroicons
   const shipIcons = {
-    'Carrier': '../RemixIcon/icons/Map/ship-fill.svg',
-    'Battleship': '../RemixIcon/icons/Map/ship-2-fill.svg',
-    'Cruiser': '../RemixIcon/icons/Map/sailboat-fill.svg',
-    'Submarine': '../RemixIcon/icons/Map/ship-line.svg',
-    'Destroyer': '../RemixIcon/icons/Map/ship-line.svg',
+    'Carrier': '../assets/images/heroicons/cube.svg',
+    'Battleship': '../assets/images/heroicons/anchor.svg',
+    'Cruiser': '../assets/images/heroicons/flag.svg',
+    'Submarine': '../assets/images/heroicons/rocket-launch.svg',
+    'Destroyer': '../assets/images/heroicons/sparkles.svg',
   };
 
   // Clears and renders a game board grid
@@ -99,15 +100,7 @@ const domController = (() => {
       shipListContainer.innerHTML = ''; // Clear previous list
       shipsToPlace.forEach((shipInfo, index) => {
           const li = document.createElement('li');
-          // Add icon
-          const icon = document.createElement('img');
-          icon.src = shipIcons[shipInfo.name] || '';
-          icon.alt = shipInfo.name + ' icon';
-          icon.style.width = '28px';
-          icon.style.height = '28px';
-          icon.style.flexShrink = '0';
-          li.appendChild(icon);
-          // Add text
+          // Only add text, no icon
           const text = document.createElement('span');
           text.textContent = `${shipInfo.name} (${shipInfo.length})`;
           li.appendChild(text);
