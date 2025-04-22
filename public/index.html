@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= htmlWebpackPlugin.options.title %></title> <!-- Title will be injected by Webpack -->
+</head>
+<body>
+  <h1>Battleship</h1>
+  <div id="message-area">Place your ships!</div> <!-- Message Area -->
+  <div id="game-container">
+    <div class="board-container">
+        <h2>Your Board</h2>
+        <div id="player-board" class="game-board"></div>
+    </div>
+    <div class="board-container">
+        <h2>Enemy Board</h2>
+        <div id="computer-board" class="game-board"></div>
+    </div>
+  </div>
+  <!-- Script will be injected by Webpack -->
+</body>
+</html> 

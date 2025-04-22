@@ -1,0 +1,42 @@
+{
+  "name": "battle-ship",
+  "version": "1.0.0",
+  "description": "solving battle ship",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "build": "webpack --mode=production",
+    "start": "webpack serve --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abbas-233/battle-ship.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abbas-233/battle-ship/issues"
+  },
+  "homepage": "https://github.com/abbas-233/battle-ship#readme",
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "babel-jest": "^29.7.0",
+    "babel-loader": "^10.0.0",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "jest": "^29.7.0",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.99.6",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\\\.m?js$": "babel-jest"
+    },
+    "moduleFileExtensions": ["js", "mjs"]
+  }
+}
