@@ -15,6 +15,14 @@ const domController = (() => {
   const placementControlsContainer = document.getElementById('placement-controls');
   const messageArea = document.getElementById('message-area');
 
+  const shipIcons = {
+    'Carrier': '../RemixIcon/icons/Map/ship-fill.svg',
+    'Battleship': '../RemixIcon/icons/Map/ship-2-fill.svg',
+    'Cruiser': '../RemixIcon/icons/Map/sailboat-fill.svg',
+    'Submarine': '../RemixIcon/icons/Map/ship-line.svg',
+    'Destroyer': '../RemixIcon/icons/Map/ship-line.svg',
+  };
+
   // Clears and renders a game board grid
   const renderBoard = (gameboard, container, isEnemyBoard = false, showShips = true) => {
     container.innerHTML = ''; // Clear previous state
@@ -91,7 +99,18 @@ const domController = (() => {
       shipListContainer.innerHTML = ''; // Clear previous list
       shipsToPlace.forEach((shipInfo, index) => {
           const li = document.createElement('li');
-          li.textContent = `${shipInfo.name} (${shipInfo.length})`;
+          // Add icon
+          const icon = document.createElement('img');
+          icon.src = shipIcons[shipInfo.name] || '';
+          icon.alt = shipInfo.name + ' icon';
+          icon.style.width = '28px';
+          icon.style.height = '28px';
+          icon.style.flexShrink = '0';
+          li.appendChild(icon);
+          // Add text
+          const text = document.createElement('span');
+          text.textContent = `${shipInfo.name} (${shipInfo.length})`;
+          li.appendChild(text);
           li.dataset.shipIndex = index;
           li.dataset.shipLength = shipInfo.length;
           li.dataset.shipName = shipInfo.name;

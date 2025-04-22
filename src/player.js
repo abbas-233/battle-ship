@@ -1,8 +1,8 @@
 import Gameboard from './gameboard.js';
 
-const Player = (type = 'human') => {
+const Player = (type = 'human', gameboardFactory = Gameboard) => {
   const playerType = type;
-  const gameboard = Gameboard(); // Each player gets their own gameboard
+  const gameboard = gameboardFactory(); // Use injected factory
   let availableAttacks = null; // For computer AI
   let potentialTargets = []; // For smarter AI - coords adjacent to hits
 
@@ -128,7 +128,10 @@ const Player = (type = 'human') => {
     gameboard, // Expose the player's own gameboard
     attack, // Human uses this directly
     computerIntelligentAttack, // Computer uses this
-    // No need to expose computerAttack anymore
+    initializeAvailableAttacks, // Expose for testing
+    addPotentialTargets, // Expose for testing
+    availableAttacks, // Expose for testing
+    potentialTargets, // Expose for testing
   };
 };
 

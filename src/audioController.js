@@ -3,13 +3,13 @@
 const audioController = (() => {
   // Preload audio files
   const hitSound = new Audio();
-  hitSound.src = 'assets/sounds/retro_explosion.mp3';
+  hitSound.src = '/assets/sounds/retro_explosion.mp3';
   
   const missSound = new Audio();
-  missSound.src = 'assets/sounds/water_splash.mp3';
+  missSound.src = '/assets/sounds/water_splash.mp3';
   
   const sunkSound = new Audio();
-  sunkSound.src = 'assets/sounds/ship_sinking.mp3';
+  sunkSound.src = '/assets/sounds/ship_sinking.mp3';
   
   const gameOverSound = new Audio();
   gameOverSound.src = 'https://assets.mixkit.co/sfx/preview/mixkit-medieval-show-fanfare-announcement-226.mp3';
