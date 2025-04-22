@@ -6,9 +6,11 @@
 }
 
 body {
-  font-family: sans-serif;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   padding: 20px;
-  background-color: #f0f0f0;
+  background: url('../assets/images/ocean-360.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
 }
 
 h1 {
@@ -67,6 +69,10 @@ h1 {
   justify-content: space-around;
   align-items: flex-start;
   flex-wrap: wrap;
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 16px;
   margin-top: 30px;
   gap: 40px;
 }
@@ -87,14 +93,17 @@ h1 {
   width: 350px;
   height: 350px;
   border: 2px solid #333;
-  background-color: #a0c0f0; /* Water color */
+  background: transparent;
   margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 
 .cell {
-  border: 1px solid #6688cc; /* Lighter border for cells */
+  border: 1px solid #6688cc;
   background-color: transparent;
-  position: relative; /* For potential hit/miss markers */
+  position: relative;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 /* Enemy cells are clickable */
@@ -104,39 +113,46 @@ h1 {
 }
 
 .enemy-cell:hover {
-    background-color: #c0e0ff;
+    background-color: rgba(192,224,255,0.7);
+    box-shadow: 0 0 8px #4af;
 }
 
 /* Cell states */
 .cell.ship {
-    background-color: #888; /* Simple ship color */
+    background: linear-gradient(135deg, #888 60%, #bbb 100%);
+    border: 1.5px solid #444;
 }
 
 .cell.miss {
     background-color: #ddd; /* Miss color */
 }
 .cell.miss::after {
-    content: '•'; /* Simple dot for miss */
+    content: '';
+    display: block;
+    width: 32px;
+    height: 32px;
+    background: url('../assets/images/pngwing.com.png') center/contain no-repeat;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.5em;
-    color: #555;
+    opacity: 0.8;
 }
 
 .cell.hit {
     background-color: #ff6666; /* Hit color */
 }
 .cell.hit::after {
-    content: 'X'; /* X for hit */
+    content: '';
+    display: block;
+    width: 32px;
+    height: 32px;
+    background: url('../assets/images/bat-22.png') center/contain no-repeat;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.2em;
-    color: #cc0000;
-    font-weight: bold;
+    opacity: 0.9;
 }
 
 /* Hide player ships on enemy board (override general .ship) */
