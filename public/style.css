@@ -65,21 +65,30 @@ h1 {
 #game-container {
   display: flex;
   justify-content: space-around;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 40px; /* Space between boards */
+  margin-top: 30px;
+  gap: 40px;
 }
 
 .board-container {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board-container h2 {
+    margin-bottom: 10px;
 }
 
 .game-board {
   display: grid;
   /* grid-template-columns set by JS */
-  width: 300px; /* Adjust size as needed */
-  height: 300px; /* Adjust size as needed */
+  width: 350px;
+  height: 350px;
   border: 2px solid #333;
   background-color: #a0c0f0; /* Water color */
+  margin: 0 auto;
 }
 
 .cell {

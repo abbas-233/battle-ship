@@ -326,113 +326,63 @@ function addPlacementListeners() {
 }
 
 function removePlacementListeners() {
-    const rotateBtn = domController.getRotateButton();
-    const randomBtn = domController.getRandomPlacementButton();
-    const startBtn = domController.getStartButton();
     const playerBoardEl = domController.getPlayerBoardContainer();
-
-    if (rotateBtn) rotateBtn.removeEventListener('click', handleRotateShip);
-    if (randomBtn) randomBtn.removeEventListener('click', handleRandomPlacement);
-    if (startBtn) startBtn.removeEventListener('click', startGame);
     if (playerBoardEl) {
         playerBoardEl.removeEventListener('mouseover', handleBoardHover);
         playerBoardEl.removeEventListener('mouseout', handleBoardLeave);
         playerBoardEl.removeEventListener('click', handleBoardClick);
     }
-    // Also clear ship list listeners if needed, though re-rendering might handle it
 }
 
-// --- Initial Setup & Reset Button ---
-document.addEventListener('DOMContentLoaded', setupGame);
+// --- Game Setup ---
 
-// Define the setupGame function that was referenced but not implemented
+// Centralized function to set up the initial game state and listeners
 function setupGame() {
-  initializeGame();
-  
-  // Add listener for reset button AFTER initial setup
-  const resetBtn = domController.getResetButton();
-  if (resetBtn) resetBtn.addEventListener('click', resetGame);
-  
-  // Add listener for sound toggle button
-  const soundToggleBtn = domController.getSoundToggleButton();
-  if (soundToggleBtn) {
-    soundToggleBtn.addEventListener('click', toggleSound);
-  }
+    initializeGame(); // Set up boards, players, and placement UI
+
+    // Add listeners for global controls that are always present
+    domController.getRotateButton().addEventListener('click', handleRotateShip);
+    domController.getRandomPlacementButton().addEventListener('click', handleRandomPlacement);
+    domController.getStartButton().addEventListener('click', startGame);
+    domController.getResetButton().addEventListener('click', resetGame);
+    domController.getSoundToggleButton().addEventListener('click', toggleSound);
+
+    // Initialize sound button text
+    domController.updateSoundButton(audioController.isSoundEnabled());
+
+    // Reset button is initially hidden, handled by domController
 }
 
-// Function to toggle sound on/off
+// --- Sound Toggling ---
+
 function toggleSound() {
-  const isEnabled = audioController.toggleSound();
-  domController.updateSoundButton(isEnabled);
-  domController.displayMessage(`Sound ${isEnabled ? 'enabled' : 'disabled'}.`);
+    const isEnabled = audioController.toggleSound();
+    domController.updateSoundButton(isEnabled);
+    console.log("Sound toggled:", isEnabled);
 }
 
-// Placeholder for computer intelligent attack - needs to be added to Player module
-// For now, let's assume Player has a method computerIntelligentAttack returning {row, col, hit}
-// We will need to modify src/player.js next.
-/* REMOVE START
-Player.prototype.computerIntelligentAttack = function(enemyBoard) {
-    console.warn('Using basic random attack for computer.');
-    // Fallback to basic random for now
-    let row, col, hit = null;
-    let validAttack = false;
-    const boardSize = 10;
-    let attempts = 0;
-    const maxAttempts = boardSize * boardSize * 2;
+// --- Random Placement ---
 
-    while (!validAttack && attempts < maxAttempts) {
-      row = Math.floor(Math.random() * boardSize);
-      col = Math.floor(Math.random() * boardSize);
-      if (enemyBoard.isValidCoordinate(row, col) && !enemyBoard.hasBeenAttacked(row, col)) {
-        validAttack = true;
-      } 
-      attempts++;
-    }
-    if (validAttack) {
-        hit = enemyBoard.receiveAttack(row, col);
-        return { row, col, hit };
-    } else {
-        console.error("Computer couldn't find a valid move!");
-        return { row: null, col: null, hit: null }; // Indicate failure
-    }
-}; 
-REMOVE END */ 
-
-// Place player ships randomly (similar to computer)
 function handleRandomPlacement() {
-  // Clear any existing ships
-  player = Player('human'); // Reset player and board
-  playerShips = FLEET.map(ship => ({ ...ship, placed: false })); // Reset placement status
-  
-  // Place ships randomly
-  const boardSize = 10;
-  playerShips.forEach(shipInfo => {
-    let placed = false;
-    while (!placed && !shipInfo.placed) {
-      const row = Math.floor(Math.random() * boardSize);
-      const col = Math.floor(Math.random() * boardSize);
-      const vertical = Math.random() < 0.5;
-      try {
-        player.gameboard.placeShip(Ship(shipInfo.length), row, col, vertical);
-        shipInfo.placed = true;
-        placed = true;
-      } catch (error) {
-        // Collision or out of bounds, try again
-      }
-    }
-  });
-  
-  // Update UI
-  domController.renderBoard(player.gameboard, domController.getPlayerBoardContainer(), false);
-  domController.renderShipList(playerShips, handleShipSelection);
-  
-  // Enable start button since all ships are placed
-  domController.enableStartButton();
-  domController.displayMessage('Ships randomly placed! Press Start Game.');
-  
-  // Play a sound for feedback
-  audioController.playSunkSound();
-  
-  // Optionally, remove placement listeners as all ships are placed
-  removePlacementListeners();
-} 
+    // Clear existing player ships first
+    player.gameboard.clearBoard(); 
+    // Place ships randomly
+    placeComputerShipsRandomly(player.gameboard); // Can reuse the same logic
+    
+    // Mark all ships as placed in the tracking array
+    playerShips.forEach(ship => ship.placed = true);
+    currentPlacingShip = null;
+
+    // Update UI
+    domController.renderBoard(player.gameboard, domController.getPlayerBoardContainer(), false, true); // Show placed ships
+    domController.renderShipList(playerShips, handleShipSelection); // Update list (should show all placed/disabled)
+    domController.clearPlacementHighlights();
+    domController.displayMessage('Ships placed randomly! Press Start Game.');
+    domController.enableStartButton();
+    removePlacementListeners(); // Remove manual placement listeners
+}
+
+// --- Start the game ---
+
+// Kick off the initial setup when the script loads
+document.addEventListener('DOMContentLoaded', setupGame); 

@@ -20,32 +20,43 @@ const audioController = (() => {
   sunkSound.volume = 0.6;
   gameOverSound.volume = 0.7;
   
+  // Check if we should play sounds (could be set by user preference)
+  let soundEnabled = true; // Default to ON, user can toggle
+  
   // Public methods
   const playHitSound = () => {
+    if (!soundEnabled) return;
     hitSound.currentTime = 0; // Reset sound to beginning
     hitSound.play().catch(e => console.warn('Sound play failed:', e));
   };
   
   const playMissSound = () => {
+    if (!soundEnabled) return;
     missSound.currentTime = 0;
     missSound.play().catch(e => console.warn('Sound play failed:', e));
   };
   
   const playSunkSound = () => {
+    if (!soundEnabled) return;
     sunkSound.currentTime = 0;
     sunkSound.play().catch(e => console.warn('Sound play failed:', e));
   };
   
   const playGameOverSound = () => {
+    if (!soundEnabled) return;
     gameOverSound.currentTime = 0;
     gameOverSound.play().catch(e => console.warn('Sound play failed:', e));
   };
   
-  // Check if we should play sounds (could be set by user preference)
-  let soundEnabled = true;
-  
   const toggleSound = () => {
     soundEnabled = !soundEnabled;
+    // Optionally stop any currently playing sounds if toggled off
+    if (!soundEnabled) {
+        hitSound.pause();
+        missSound.pause();
+        sunkSound.pause();
+        gameOverSound.pause();
+    }
     return soundEnabled;
   };
   

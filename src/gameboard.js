@@ -89,6 +89,14 @@ const Gameboard = (size = 10) => {
       return grid.map(row => [...row]);
   };
 
+  // Function to clear the board for resetting or random placement
+  const clearBoard = () => {
+      grid = Array(size).fill(null).map(() => Array(size).fill(null));
+      ships = [];
+      missedAttacks = [];
+      attackedCoords = new Set();
+  };
+
   // Public interface
   return {
     placeShip,
@@ -97,7 +105,8 @@ const Gameboard = (size = 10) => {
     allShipsSunk,
     getGrid, // Expose for testing and potentially rendering
     hasBeenAttacked, // Expose for rendering checks
-    isValidCoordinate // Potentially useful externally
+    isValidCoordinate, // Potentially useful externally
+    clearBoard // Expose the new method
   };
 };
 
